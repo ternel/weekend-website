@@ -2,6 +2,11 @@
 
 class Weekend
 {
+    /**
+     * Compute the main text
+     *
+     * @return string
+     */
     static public function getText()
     {
         $msg = '';
@@ -39,13 +44,19 @@ class Weekend
         return $msg;
     }
 
-
+    /**
+     * Compute all holiday of the year
+     *
+     * @param int|null $year
+     * @return array
+     */
     static function getHolidays($year = null)
     {
         if ($year === null) {
             $year = intval(date('Y'));
         }
 
+        // Everything can be compute from the easter date
         $easterDate  = easter_date($year);
         $easterDay   = date('j', $easterDate);
         $easterMonth = date('n', $easterDate);
@@ -74,11 +85,21 @@ class Weekend
         return $holidays;
     }
 
+    /**
+     * Are we working today?
+     *
+     * @return mixed
+     */
     static function checkNotWorkingDay()
     {
         return array_search(date('d-m-Y'), self::getHolidays());
     }
 
+    /**
+     * Are we working tomorrow?
+     *
+     * @return mixed
+     */
     static function checkTomorrowNotWorkingDay()
     {
         $tomorrow = date('d-m-Y', strtotime("+1day"));
@@ -86,9 +107,19 @@ class Weekend
         return array_search($tomorrow, self::getHolidays());
     }
 
+    /**
+     * Compute the subtext
+     *
+     * @return string
+     */
     static public function getSubText()
     {
         $msg = '';
+
+        // Jour férié demain
+        if (false !== self::checkTomorrowNotWorkingDay()) {
+            return "Mais demain, on ne travaille pas \o/";
+        }
 
         // Jour férié
         if (false !== self::checkNotWorkingDay()) {
@@ -106,5 +137,4 @@ class Weekend
 
         return $msg;
     }
-
 }

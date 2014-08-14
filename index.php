@@ -31,21 +31,12 @@
 				<?php echo Weekend::getText() ?>
 			</p>
 
-      <?php if (false !== Weekend::checkNotWorkingDay()): ?>
-      <p class="msg">
-        <?php echo Weekend::getSubText() ?>
-      </p>
-      <?php endif; ?>
-
-
-      <?php
-        $msg = "Mais demain, on ne travaille pas \o/";
-
-        if (false !== Weekend::checkTomorrowNotWorkingDay()):?>
+      <?php if (false !== Weekend::checkNotWorkingDay() || false !== Weekend::checkTomorrowNotWorkingDay()): ?>
         <p class="msg">
-          <?php echo $msg; ?>
+          <?php echo Weekend::getSubText() ?>
         </p>
       <?php endif; ?>
+
       <p id='footer'><a href='http://twitter.com/BientotLeWE'><img src='twitter.png' alt='Twitter' title='Twitter' /></a></p>
 
       <script>
