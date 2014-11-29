@@ -118,10 +118,19 @@ class Weekend
 
         // Jour férié demain
         if (false !== self::checkTomorrowNotWorkingDay()) {
-            return "Mais demain, on ne travaille pas \o/";
+            // Aujourd'hui c'est vendredi, donc demain Samedi
+            if (5 == date('w')) {
+                $msg = "Et on perd un jour férié ce week-end :(";
+            }
+            // Aujourd'hui c'est samedi, donc demain Dimanche
+            elseif (6 == date('w')) {
+                $msg = "Et on perd un jour férié ce week-end :(";
+            } else {
+                $msg = "Mais demain, on ne travaille pas \o/";
+            }
         }
 
-        // Jour férié
+        // Jour férié aujourd'hui
         if (false !== self::checkNotWorkingDay()) {
             // Vendredi
             if (5 == date('w')) {
