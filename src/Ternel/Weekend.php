@@ -1,5 +1,7 @@
 <?php
 
+namespace Ternel;
+
 class Weekend
 {
     /**
@@ -7,7 +9,7 @@ class Weekend
      *
      * @return string
      */
-    static public function getText()
+    public function getText()
     {
         $msg = '';
         // Vendredi
@@ -44,13 +46,55 @@ class Weekend
         return $msg;
     }
 
+
+
+    /**
+     * Compute the subtext
+     *
+     * @return string
+     */
+    public function getSubText()
+    {
+        $msg = '';
+
+        // Jour férié demain
+        if (false !== $this->checkTomorrowNotWorkingDay()) {
+            // Aujourd'hui c'est vendredi, donc demain Samedi
+            if (5 == date('w')) {
+                $msg = "Et on perd un jour férié ce week-end :(";
+            }
+            // Aujourd'hui c'est samedi, donc demain Dimanche
+            elseif (6 == date('w')) {
+                $msg = "Et on perd un jour férié ce week-end :(";
+            } else {
+                $msg = "Mais demain, on ne travaille pas \o/";
+            }
+        }
+
+        // Jour férié aujourd'hui
+        if (false !== $this->checkNotWorkingDay()) {
+            // Vendredi
+            if (5 == date('w')) {
+                $msg = "En fait, si. C'est d’ores et déjà le week-end \o/";
+            }
+            // Lundi
+            elseif (1 == date('w')) {
+                $msg = "En fait, si. C'est toujours le week-end \o/";
+            } else {
+                $msg = "Mais on ne travaille pas \o/";
+            }
+        }
+
+        return $msg;
+    }
+
     /**
      * Compute all holiday of the year
      *
      * @param int|null $year
      * @return array
      */
-    static function getHolidays($year = null)
+    private function getHolidays($year = null)
     {
         if ($year === null) {
             $year = intval(date('Y'));
@@ -77,7 +121,7 @@ class Weekend
             'lundi'     => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 1,    $easterYear)), // Lundi de pâcques
             'ascension' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 39, $easterYear)), // Ascension
             'pentecote' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 49, $easterYear)), // Pentecôte
-            'nouvelan'    => date('d-m-Y', mktime(0, 0, 0, 1,  1,  $year+1)), // next 1er janvier
+            'nouvelan'  => date('d-m-Y', mktime(0, 0, 0, 1,  1,  $year+1)), // next 1er janvier
             //'test' => date('d-m-Y', time()), // TEST
         );
 
@@ -91,9 +135,9 @@ class Weekend
      *
      * @return mixed
      */
-    static function checkNotWorkingDay()
+    private function checkNotWorkingDay()
     {
-        return array_search(date('d-m-Y'), self::getHolidays());
+        return array_search(date('d-m-Y'), $this->getHolidays());
     }
 
     /**
@@ -101,50 +145,10 @@ class Weekend
      *
      * @return mixed
      */
-    static function checkTomorrowNotWorkingDay()
+    private function checkTomorrowNotWorkingDay()
     {
         $tomorrow = date('d-m-Y', strtotime("+1day"));
 
-        return array_search($tomorrow, self::getHolidays());
-    }
-
-    /**
-     * Compute the subtext
-     *
-     * @return string
-     */
-    static public function getSubText()
-    {
-        $msg = '';
-
-        // Jour férié demain
-        if (false !== self::checkTomorrowNotWorkingDay()) {
-            // Aujourd'hui c'est vendredi, donc demain Samedi
-            if (5 == date('w')) {
-                $msg = "Et on perd un jour férié ce week-end :(";
-            }
-            // Aujourd'hui c'est samedi, donc demain Dimanche
-            elseif (6 == date('w')) {
-                $msg = "Et on perd un jour férié ce week-end :(";
-            } else {
-                $msg = "Mais demain, on ne travaille pas \o/";
-            }
-        }
-
-        // Jour férié aujourd'hui
-        if (false !== self::checkNotWorkingDay()) {
-            // Vendredi
-            if (5 == date('w')) {
-                $msg = "En fait, si. C'est d’ores et déjà le week-end \o/";
-            }
-            // Lundi
-            elseif (1 == date('w')) {
-                $msg = "En fait, si. C'est toujours le week-end \o/";
-            } else {
-                $msg = "Mais on ne travaille pas \o/";
-            }
-        }
-
-        return $msg;
+        return array_search($tomorrow, $this->getHolidays());
     }
 }

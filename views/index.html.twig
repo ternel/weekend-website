@@ -28,16 +28,16 @@
    ?>
    <body>
 			<p class="msg">
-				<?php echo Weekend::getText() ?>
+				{{ text }}
 			</p>
 
-      <?php if (false !== Weekend::checkNotWorkingDay() || false !== Weekend::checkTomorrowNotWorkingDay()): ?>
+      {% if subtext != '' %}
         <p class="msg">
-          <?php echo Weekend::getSubText() ?>
+          {{ subtext }}
         </p>
-      <?php endif; ?>
+      {% endif %}
 
-      <p id='footer'><a href='http://twitter.com/BientotLeWE'><img src='twitter.png' alt='Twitter' title='Twitter' /></a></p>
+      <p id="footer"><a href="http://twitter.com/BientotLeWE"><img src="img/twitter.png" alt="Twitter" title="Twitter" /></a></p>
 
       <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

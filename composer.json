@@ -1,0 +1,18 @@
+{
+    "name": "ternel/weekend",
+    "description": "Est-ce que c'est bientôt le weekend ? .fr",
+    "require": {
+        "silex/silex": "~1.2",
+        "twig/twig": "~1.18"
+    },
+    "authors": [
+        {
+            "name": "Benjamin Clay",
+            "email": "benj.clay@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-0": { "": "src/" }
+    },
+    "minimum-stability": "stable"
+}
