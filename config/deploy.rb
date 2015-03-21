@@ -5,7 +5,17 @@ set :application, 'weekend'
 set :repo_url, 'git@github.com:ternel/weekend-website.git'
 
 # Default branch is :master
-ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
+#ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
+def tag_branch_target
+  tags = `git tag`.split("\n")
+  tag_prompt = "#{tags.reverse[(0..5)]}"
+  ask :branch_or_tag, tag_prompt
+  tag = fetch(:branch_or_tag)
+  tag.match(/^\d/).nil? ? tags.last : tag
+end
+
+
+set :branch, proc { tag_branch_target }
 
 # Default deploy_to directory is /var/www/my_app_name
 # set :deploy_to, '/home/ternel/www/weekend'
@@ -34,15 +44,4 @@ ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
 # Default value for keep_releases is 5
 # set :keep_releases, 5
 
-namespace :deploy do
-
-  after :restart, :clear_cache do
-    on roles(:web), in: :groups, limit: 3, wait: 10 do
-      # Here we can do anything such as:
-      # within release_path do
-      #   execute :rake, 'cache:clear'
-      # end
-    end
-  end
-
-end
+SSHKit.config.command_map[:composer] = "php /home/ternel/www/weekend/shared/composer.phar"
