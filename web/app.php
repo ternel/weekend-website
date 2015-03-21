@@ -16,6 +16,7 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
 // Cache
 $app->register(new Silex\Provider\HttpCacheServiceProvider(), array(
     'http_cache.cache_dir' => __DIR__.'/../cache/',
+    'http_cache.esi'       => null,
 ));
 
 // Weekend, where the magic happens.
@@ -26,24 +27,32 @@ $app['weekend'] = function () {
 
 // Website
 $app->get('/', function () use ($app) {
-    return new Response($app['twig']->render('index.html.twig', [
+    $response = new Response($app['twig']->render('index.html.twig', [
             'text'    => $app['weekend']->getText(),
             'subtext' => $app['weekend']->getSubText(),
         ]),
-        200,
-        ['Cache-Control' => 's-maxage=60']
+        200
     );
+
+    $response->setPublic();
+    $response->setSharedMaxAge(60);
+
+    return $response;
 });
 
 // Api
 $app->get('/api', function () use ($app) {
-    return new JsonResponse([
+    $response = new JsonResponse([
             'text'    => $app['weekend']->getText(),
             'subtext' => $app['weekend']->getSubText(),
         ],
-        200,
-        ['Cache-Control' => 'maxage=60']
+        200
     );
+
+    $response->setPublic();
+    $response->setSharedMaxAge(60);
+
+    return $response;
 });
 
 $app['http_cache']->run();
