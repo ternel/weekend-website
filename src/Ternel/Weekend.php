@@ -12,6 +12,11 @@ class Weekend
     public function getText()
     {
         $msg = '';
+        // April fool
+        if (1 == date('j') && 4 == date('n')) {
+            $msg = 'C\'est le week-end ! \o/';
+        }
+
         // Vendredi
         if (5 == date('w')) {
             if (date('G') >= 18) {
