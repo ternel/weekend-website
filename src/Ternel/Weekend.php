@@ -14,7 +14,7 @@ class Weekend
         $msg = '';
         // April fool
         if (1 == date('j') && 4 == date('n')) {
-            $msg = 'C\'est le week-end ! \o/';
+            return 'C\'est le week-end ! \o/';
         }
 
         // Vendredi
