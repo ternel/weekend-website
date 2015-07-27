@@ -1,7 +1,7 @@
 estcequecestbientotleweekend.fr
 ==============
 
-Ok, the code suck. But I was drunk when I did it.
+Ok, the code sucks. But I was drunk when I did it.
 
 Deploy
 ```
