@@ -142,7 +142,7 @@ class Weekend
             // These days have a date depending on easter
             'lundi'     => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 1,    $easterYear)), // Lundi de pâcques
             'ascension' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 39, $easterYear)), // Ascension
-            'pentecote' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 49, $easterYear)), // Pentecôte
+            'pentecote' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 50, $easterYear)), // Pentecôte
 
             'nextnouvelan' => date('d-m-Y', mktime(0, 0, 0, 1,  1,  $year+1)), // next 1er janvier
             //'test' => date('d-m-Y', time()), // TEST
