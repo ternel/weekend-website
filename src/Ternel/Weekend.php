@@ -126,10 +126,14 @@ class Weekend
             'lundi'     => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 1,    $easterYear)), // Lundi de pâcques
             'ascension' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 39, $easterYear)), // Ascension
             'pentecote' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 49, $easterYear)), // Pentecôte
-            
+
             'nextnouvelan' => date('d-m-Y', mktime(0, 0, 0, 1,  1,  $year+1)), // next 1er janvier
             //'test' => date('d-m-Y', time()), // TEST
         );
+
+        if($this->isAlsacianHolidaysDate($easterDate, $year)){
+            $holidays = array_merge($holidays, $this->addAlsacianHolidays($easterDate, $year));
+        }
 
         //sort($holidays);
 
@@ -156,5 +160,63 @@ class Weekend
         $tomorrow = date('d-m-Y', strtotime("+1day"));
 
         return array_search($tomorrow, $this->getHolidays());
+    }
+
+    /**
+     * Avoid calling ip file every day & every hit
+     *
+     * @param $easterDate
+     * @param $year
+     * @return bool
+     */
+    private function isAlsacianHolidaysDate($easterDate, $year)
+    {
+        //3 days before easter, can't $easterDay - 3 if easter is the first day of month
+         return date('d-m-Y') == date('d-m-Y', mktime(0, 0, 0, 12, 26, $year)) ||
+            date('d-m-Y') == date('d-m-Y', mktime($easterDate - (3600 * 3 * 24)));
+    }
+
+    /**
+     * We call ipinfo if we are on alsacian holidays
+     *
+     * @param $easterDate
+     * @param $year
+     * @return array
+     */
+    private function addAlsacianHolidays($easterDate, $year)
+    {
+        //3 days before easter, can't $easterDay - 3 if easter is the first day of month
+        $alsacianHolidays = [
+            'vendredisaint' => date('d-m-Y', mktime($easterDate - (3600 * 3 * 24))),
+            'saintetienne' => date('d-m-Y', mktime(0, 0, 0, 12, 26, $year))
+        ];
+
+        //fast ip
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        }elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        }else{
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+
+        //we allow only 3 districts
+        $districsAllowed = [
+            '67',
+            '68',
+            '90'
+        ];
+
+        //yolo json
+        $json = json_decode(file_get_contents('http://ipinfo.io/' . $ip . '/json'));
+
+        foreach($districsAllowed as $district){
+            if(substr((int)$json->postal, 0, 2) == $district){
+                return $alsacianHolidays;
+            }
+        }
+
+        //nicht im Elsass
+        return [];
     }
 }
