@@ -171,9 +171,9 @@ class Weekend
      */
     private function isAlsacianHolidaysDate($easterDate, $year)
     {
-        //3 days before easter, can't $easterDay - 3 if easter is the first day of month
+        //3 days before easter, can't $easterDay - 2 if easter is the first day of month
          return date('d-m-Y') == date('d-m-Y', mktime(0, 0, 0, 12, 26, $year)) ||
-            date('d-m-Y') == date('d-m-Y', mktime($easterDate - (3600 * 3 * 24)));
+            date('d-m-Y') == date('d-m-Y', mktime($easterDate - (3600 * 2 * 24)));
     }
 
     /**
@@ -185,9 +185,9 @@ class Weekend
      */
     private function addAlsacianHolidays($easterDate, $year)
     {
-        //3 days before easter, can't $easterDay - 3 if easter is the first day of month
+        //3 days before easter, can't $easterDay - 2 if easter is the first day of month
         $alsacianHolidays = [
-            'vendredisaint' => date('d-m-Y', mktime($easterDate - (3600 * 3 * 24))),
+            'vendredisaint' => date('d-m-Y', mktime($easterDate - (3600 * 2 * 24))),
             'saintetienne' => date('d-m-Y', mktime(0, 0, 0, 12, 26, $year))
         ];
 
@@ -204,7 +204,8 @@ class Weekend
         $districsAllowed = [
             '67',
             '68',
-            '90'
+            '90',
+            '57'
         ];
 
         //yolo json
