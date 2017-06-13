@@ -51,8 +51,6 @@ class Weekend
         return $msg;
     }
 
-
-
     /**
      * Compute the subtext
      *
@@ -93,6 +91,25 @@ class Weekend
         return $msg;
     }
 
+    public function isWeekend()
+    {
+        // April fool
+        if (1 == date('j') && 4 == date('n')) {
+            return true;
+        }
+
+        // Vendredi
+        if (5 == date('w') && date('G') >= 18) {
+            return true;
+        }
+        // Samedi et Dimanche
+        elseif (date('w') == 6 || date('w') == 0)) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Compute all holiday of the year
      *
@@ -126,7 +143,7 @@ class Weekend
             'lundi'     => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 1,    $easterYear)), // Lundi de pâcques
             'ascension' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 39, $easterYear)), // Ascension
             'pentecote' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 49, $easterYear)), // Pentecôte
-            
+
             'nextnouvelan' => date('d-m-Y', mktime(0, 0, 0, 1,  1,  $year+1)), // next 1er janvier
             //'test' => date('d-m-Y', time()), // TEST
         );

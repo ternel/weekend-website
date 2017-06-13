@@ -43,8 +43,9 @@ $app->get('/', function () use ($app) {
 // Api
 $app->get('/api', function () use ($app) {
     $response = new JsonResponse([
-            'text'    => $app['weekend']->getText(),
-            'subtext' => $app['weekend']->getSubText(),
+            'text'       => $app['weekend']->getText(),
+            'subtext'    => $app['weekend']->getSubText(),
+            'is_weekend' => $app['weekend']->isWeekend(),
         ],
         200
     );
