@@ -148,6 +148,10 @@ class Weekend
             //'test' => date('d-m-Y', time()), // TEST
         );
 
+        if($this->isAlsacianHolidaysDate($easterDate, $year)){
+            $holidays = array_merge($holidays, $this->addAlsacianHolidays($easterDate, $year));
+        }
+
         //sort($holidays);
 
         return $holidays;
@@ -173,5 +177,82 @@ class Weekend
         $tomorrow = date('d-m-Y', strtotime("+1day"));
 
         return array_search($tomorrow, $this->getHolidays());
+    }
+
+    /**
+     * Avoid calling ip file every day & every hit
+     *
+     * @param $easterDate
+     * @param $year
+     * @return bool
+     */
+    private function isAlsacianHolidaysDate($easterDate, $year)
+    {
+         // 2 days before easter, can't $easterDay - 2 if easter is the first day of month
+         return date('d-m-Y') == date('d-m-Y', mktime(0, 0, 0, 12, 26, $year)) ||
+            date('d-m-Y') == date('d-m-Y', mktime($easterDate - (3600 * 2 * 24)));
+    }
+
+    /**
+     * We call ipinfo if we are on alsacian holidays
+     *
+     * @param $easterDate
+     * @param $year
+     * @return array
+     */
+    private function addAlsacianHolidays($easterDate, $year)
+    {
+        // 2 days before easter, can't $easterDay - 2 if easter is the first day of month
+        $alsacianHolidays = [
+            'vendredisaint' => date('d-m-Y', mktime($easterDate - (3600 * 2 * 24))),
+            'saintetienne' => date('d-m-Y', mktime(0, 0, 0, 12, 26, $year))
+        ];
+
+        // find real ip
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        }elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        }else{
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+
+        // we allow only 4 districts
+        $districsAllowed = [
+            '67',
+            '68',
+            '90',
+            '57'
+        ];
+
+        // using curl instead of file_get_contents to avoid "warning error"
+        try{
+            if(extension_loaded('curl')){
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, 'http://ipinfo.io/' . $ip . '/json');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+                $json = json_decode(curl_exec($ch));
+
+                curl_close($ch);
+            }
+
+            if(!isset($json->postal)){
+                throw new \ErrorException('Invalid json');
+            }
+
+        }catch (\ErrorException $e){
+            // invalid json
+           return [];
+        }
+
+        foreach($districsAllowed as $district){
+            if(substr((int)$json->postal, 0, 2) == $district){
+                return $alsacianHolidays;
+            }
+        }
+
+        // nicht im Elsass
+        return [];
     }
 }
