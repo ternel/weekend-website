@@ -1,6 +1,6 @@
 <?php
 
-namespace Ternel;
+namespace App;
 
 class Weekend
 {
@@ -103,7 +103,7 @@ class Weekend
             return true;
         }
         // Samedi et Dimanche
-        elseif (date('w') == 6 || date('w') == 0)) {
+        elseif (date('w') == 6 || date('w') == 0) {
             return true;
         }
 

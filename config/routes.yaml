@@ -1,0 +1,7 @@
+index:
+    path: /
+    controller: App\Controller\DefaultController::indexAction
+
+api:
+    path: /
+    controller: App\Controller\DefaultController::apiAction
