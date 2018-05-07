@@ -6,7 +6,7 @@ from fabric.colors import *
 
 def prod():
     env.hosts = [ "ternel@ternel.net" ]
-    env.srvdir = '/home/ternel/www/weekend/'
+    env.srvdir = '/home/ternel/www/estcequecestbientotleweekend.fr/prod/current/'
     env.git_branch = 'master'
 
 def deploy():
@@ -14,4 +14,4 @@ def deploy():
         green("Deploy and install vendors")
         run('git checkout %s' % env.git_branch)
         run('git pull')
-        run('php /home/ternel/www/weekend/shared/composer.phar install --no-dev -o')
+        run('composer install --no-dev -o')

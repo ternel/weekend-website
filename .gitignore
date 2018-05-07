@@ -1,5 +1,6 @@
 cache/*
 vendor/
+*.pyc
 
 ###> symfony/framework-bundle ###
 .env
