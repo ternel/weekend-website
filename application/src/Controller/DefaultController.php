@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class DefaultController extends Controller
 {
-    public function indexAction(Weekend $weekend)
+    public function index(Weekend $weekend)
     {
         $response = $this->render('index.html.twig', [
             'text'    => $weekend->getText(),
@@ -21,7 +21,7 @@ class DefaultController extends Controller
         return $response;
     }
 
-    public function apiAction(Weekend $weekend)
+    public function api(Weekend $weekend)
     {
         $response = new JsonResponse([
             'text'       => $weekend->getText(),

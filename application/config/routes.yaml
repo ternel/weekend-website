@@ -1,7 +1,7 @@
 index:
     path: /
-    controller: App\Controller\DefaultController::indexAction
+    controller: App\Controller\DefaultController::index
 
 api:
     path: /api
-    controller: App\Controller\DefaultController::apiAction
+    controller: App\Controller\DefaultController::api
