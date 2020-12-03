@@ -10,6 +10,12 @@ class DefaultController extends Controller
 {
     public function index(Weekend $weekend)
     {
+        if(!preg_match('/AppleWebKit|Chrome|Edge|Gecko|Opera|Trident/i', $_SERVER['HTTP_USER_AGENT'])) {
+            // We didn't detect a browser that has a rendering engine,
+            // so let's return the JSON response instead.
+            return $this->api($weekend);
+        }
+
         $response = $this->render('index.html.twig', [
             'text'    => $weekend->getText(),
             'subtext' => $weekend->getSubText(),
