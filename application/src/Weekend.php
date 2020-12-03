@@ -111,7 +111,7 @@ class Weekend
     }
 
     /**
-     * Compute all holiday of the year
+     * Compute all holidays of the year
      *
      * @param int|null $year
      * @return array
