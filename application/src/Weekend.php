@@ -34,33 +34,33 @@ class Weekend
      */
     public function getText(): string
     {
-        $msg = 'Non. ¯\_(ツ)_/¯'; // Default
+        $msg = "Non. ¯\_(ツ)_/¯"; // Default
 
         if ('April 1st' == date('F jS')) {
             // April fool
-            return 'C\'est le week-end ! \o/';
+            return "C'est le week-end ! \o/";
         }
 
         if ('Friday' == date('l')) {
             if (date('G') >= 18) {
-                $msg = 'C\'est le week-end ! \o/';
+                $msg = "C'est le week-end ! \o/";
             } elseif (date('G') >= 16){
-                $msg = 'Officiellement non, mais c\'est comme si. ¬‿¬';
+                $msg = "Officiellement non, mais c'est comme si. ¬‿¬";
             } else {
-                $msg = 'Presque, mais pas encore. :(';
+                $msg = "Presque, mais pas encore. :(";
             }
         }
         elseif ('Thursday' == date('l') && (date('G') >= 14)) {
-            $msg = 'Bientôt… B-)';
+            $msg = "Bientôt… B-)";
         }
         elseif ('Saturday' == date('l')) {
-            $msg = 'C\'est le week-end ! \o/';
+            $msg = "C'est le week-end ! \o/";
         }
         elseif ('Sunday' == date('l')) {
             if ((date('G') >= 21)) {
-                $msg = 'C\'est la fin… :(';
+                $msg = "C'est la fin… :(";
             } else {
-                $msg = 'C\'est le week-end ! \o/';
+                $msg = "C'est le week-end ! \o/";
             }
         }
 
