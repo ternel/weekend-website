@@ -34,14 +34,14 @@ class Weekend
      */
     public function getText(): string
     {
-        $msg = '';
-        // April fool
-        if (1 == date('j') && 4 == date('n')) {
+        $msg = 'Non. ¯\_(ツ)_/¯'; // Default
+
+        if ('April 1st' == date('F jS')) {
+            // April fool
             return 'C\'est le week-end ! \o/';
         }
 
-        // Vendredi
-        if (5 == date('w')) {
+        if ('Friday' == date('l')) {
             if (date('G') >= 18) {
                 $msg = 'C\'est le week-end ! \o/';
             } elseif (date('G') >= 16){
@@ -50,25 +50,18 @@ class Weekend
                 $msg = 'Presque, mais pas encore. :(';
             }
         }
-        // Jeudi aprem
-        elseif (4 == date('w') && (date('G') >= 14)) {
+        elseif ('Thursday' == date('l') && (date('G') >= 14)) {
             $msg = 'Bientôt… B-)';
         }
-        // Samedi
-        elseif (6 == date('w')) {
+        elseif ('Saturday' == date('l')) {
             $msg = 'C\'est le week-end ! \o/';
         }
-        // Dimanche
-        elseif (0 == date('w')) {
+        elseif ('Sunday' == date('l')) {
             if ((date('G') >= 21)) {
                 $msg = 'C\'est la fin… :(';
             } else {
                 $msg = 'C\'est le week-end ! \o/';
             }
-        }
-        // Semaine
-        else {
-            $msg = 'Non. ¯\_(ツ)_/¯';
         }
 
         return $msg;
@@ -84,11 +77,11 @@ class Weekend
         // Jour férié demain
         if (false !== $this->checkTomorrowNotWorkingDay()) {
             // Aujourd'hui c'est vendredi, donc demain Samedi
-            if (5 == date('w')) {
+            if ('Friday' == date('l')) {
                 $msg = "Et on perd un jour férié ce week-end. X-(";
             }
             // Aujourd'hui c'est samedi, donc demain Dimanche
-            elseif (6 == date('w')) {
+            elseif ('Saturday' == date('l')) {
                 $msg = "Et on perd un jour férié ce week-end. X-(";
             } else {
                 $msg = "Mais demain, on ne travaille pas ! B-)";
@@ -97,12 +90,10 @@ class Weekend
 
         // Jour férié aujourd'hui
         if (false !== $this->checkNotWorkingDay()) {
-            // Vendredi
-            if (5 == date('w')) {
+            if ('Friday' == date('l')) {
                 $msg = "En fait, si. C'est d’ores et déjà le week-end ! \o/";
             }
-            // Lundi
-            elseif (1 == date('w')) {
+            elseif ('Monday' == date('l')) {
                 $msg = "En fait, si. C'est toujours le week-end ! \o/";
             } else {
                 $msg = "Mais on ne travaille pas ! B-)";
@@ -114,17 +105,15 @@ class Weekend
 
     public function isWeekend()
     {
-        // April fool
-        if (1 == date('j') && 4 == date('n')) {
+        if ('April 1st' == date('F jS')) {
+            // April fool
             return true;
         }
 
-        // Vendredi
-        if (5 == date('w') && date('G') >= 18) {
+        if ('Friday' == date('l') && date('G') >= 18) {
             return true;
         }
-        // Samedi et Dimanche
-        elseif (date('w') == 6 || date('w') == 0) {
+        elseif ('Saturday' == date('l') || 'Sunday' == date('l')) {
             return true;
         }
 
