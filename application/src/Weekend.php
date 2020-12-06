@@ -4,48 +4,64 @@ namespace App;
 
 class Weekend
 {
+    private const MAPPING_EMOTICONS_EMOJIS = [
+        '\o/'  => '🎉',
+        '◄:•D' => '🥳',
+        'B-)'  => '😎',
+        '¬‿¬'  => '😏',
+        ':('   => '😟',
+        'X-('  => '😠',
+    ];
+
+    /**
+     * Compute the main text with emojis
+     */
+    public function getRichText(): string
+    {
+        return strtr($this->getText(), self::MAPPING_EMOTICONS_EMOJIS);
+    }
+
+    /**
+     * Compute the main subtext with emojis
+     */
+    public function getRichSubText(): string
+    {
+        return strtr($this->getSubText(), self::MAPPING_EMOTICONS_EMOJIS);
+    }
+
     /**
      * Compute the main text
-     *
-     * @return string
      */
-    public function getText()
+    public function getText(): string
     {
-        $msg = '';
-        // April fool
-        if (1 == date('j') && 4 == date('n')) {
-            return 'C\'est le week-end ! \o/';
+        $msg = "Non. ¯\_(ツ)_/¯"; // Default
+
+        if ('April 1st' == date('F jS')) {
+            // April fool
+            return "C'est le week-end ! \o/";
         }
 
-        // Vendredi
-        if (5 == date('w')) {
+        if ('Friday' == date('l')) {
             if (date('G') >= 18) {
-                $msg = 'C\'est le week-end ! \o/';
+                $msg = "C'est le week-end ! \o/";
             } elseif (date('G') >= 16){
-                $msg = 'Officiellement non, mais c\'est comme si.';
+                $msg = "Officiellement non, mais c'est comme si. ¬‿¬";
             } else {
-                $msg = 'Presque, mais pas encore. :( ';
+                $msg = "Presque, mais pas encore. :(";
             }
         }
-        // Jeudi aprem
-        elseif (4 == date('w') && (date('G') >= 14)) {
-            $msg = 'Bientôt...';
+        elseif ('Thursday' == date('l') && (date('G') >= 14)) {
+            $msg = "Bientôt… B-)";
         }
-        // Samedi
-        elseif (6 == date('w')) {
-            $msg = 'C\'est le week-end ! \o/';
+        elseif ('Saturday' == date('l')) {
+            $msg = "C'est le week-end ! \o/";
         }
-        // Dimanche
-        elseif (0 == date('w')) {
+        elseif ('Sunday' == date('l')) {
             if ((date('G') >= 21)) {
-                $msg = 'C\'est la fin... :(';
+                $msg = "C'est la fin… :(";
             } else {
-                $msg = 'C\'est le week-end ! \o/';
+                $msg = "C'est le week-end ! \o/";
             }
-        }
-        // Semaine
-        else {
-            $msg = 'Non.';
         }
 
         return $msg;
@@ -53,38 +69,34 @@ class Weekend
 
     /**
      * Compute the subtext
-     *
-     * @return string
      */
-    public function getSubText()
+    public function getSubText(): string
     {
         $msg = '';
 
         // Jour férié demain
         if (false !== $this->checkTomorrowNotWorkingDay()) {
             // Aujourd'hui c'est vendredi, donc demain Samedi
-            if (5 == date('w')) {
-                $msg = "Et on perd un jour férié ce week-end :(";
+            if ('Friday' == date('l')) {
+                $msg = "Et on perd un jour férié ce week-end. X-(";
             }
             // Aujourd'hui c'est samedi, donc demain Dimanche
-            elseif (6 == date('w')) {
-                $msg = "Et on perd un jour férié ce week-end :(";
+            elseif ('Saturday' == date('l')) {
+                $msg = "Et on perd un jour férié ce week-end. X-(";
             } else {
-                $msg = "Mais demain, on ne travaille pas \o/";
+                $msg = "Mais demain, on ne travaille pas ! B-)";
             }
         }
 
         // Jour férié aujourd'hui
         if (false !== $this->checkNotWorkingDay()) {
-            // Vendredi
-            if (5 == date('w')) {
-                $msg = "En fait, si. C'est d’ores et déjà le week-end \o/";
+            if ('Friday' == date('l')) {
+                $msg = "En fait, si. C'est d’ores et déjà le week-end ! \o/";
             }
-            // Lundi
-            elseif (1 == date('w')) {
-                $msg = "En fait, si. C'est toujours le week-end \o/";
+            elseif ('Monday' == date('l')) {
+                $msg = "En fait, si. C'est toujours le week-end ! \o/";
             } else {
-                $msg = "Mais on ne travaille pas \o/";
+                $msg = "Mais on ne travaille pas ! B-)";
             }
         }
 
@@ -93,17 +105,15 @@ class Weekend
 
     public function isWeekend()
     {
-        // April fool
-        if (1 == date('j') && 4 == date('n')) {
+        if ('April 1st' == date('F jS')) {
+            // April fool
             return true;
         }
 
-        // Vendredi
-        if (5 == date('w') && date('G') >= 18) {
+        if ('Friday' == date('l') && date('G') >= 18) {
             return true;
         }
-        // Samedi et Dimanche
-        elseif (date('w') == 6 || date('w') == 0) {
+        elseif ('Saturday' == date('l') || 'Sunday' == date('l')) {
             return true;
         }
 
@@ -111,7 +121,7 @@ class Weekend
     }
 
     /**
-     * Compute all holiday of the year
+     * Compute all holidays of the year
      *
      * @param int|null $year
      * @return array
