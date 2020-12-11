@@ -11,11 +11,14 @@ class DefaultController extends Controller
 {
     public function index(Request $request, Weekend $weekend)
     {
+        /** 
+        * Quickfix - @todo: avoid user-agent, use the accept-encoding header 
         if(!preg_match('/AppleWebKit|Chrome|Edge|Gecko|Opera|Trident/i', $request->headers->get('User-Agent'))) {
             // We didn't detect a browser that has a rendering engine,
             // so let's return the JSON response instead.
             return $this->api($weekend);
         }
+        */
 
         $response = $this->render('index.html.twig', [
             'text'    => $weekend->getRichText(),
