@@ -50,6 +50,9 @@ class Weekend
                 $msg = "Presque, mais pas encore. :(";
             }
         }
+        elseif ('Tuesday' === date('l')) {
+            $msg = "Ça y est, c'est Mardi, c'est bientôt le Weekend ! B-)";
+        }
         elseif ('Thursday' == date('l') && (date('G') >= 14)) {
             $msg = "Bientôt… B-)";
         }
