@@ -2230,16 +2230,16 @@
         },
         {
             "name": "symfony/runtime",
-            "version": "v5.4.46",
+            "version": "v5.4.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/runtime.git",
-                "reference": "242b4d773c004fa258e1b412f3f49fc2ac78353a"
+                "reference": "b1ee7084e363f063f102ff1576b7af7a6335b6ca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/runtime/zipball/242b4d773c004fa258e1b412f3f49fc2ac78353a",
-                "reference": "242b4d773c004fa258e1b412f3f49fc2ac78353a",
+                "url": "https://api.github.com/repos/symfony/runtime/zipball/b1ee7084e363f063f102ff1576b7af7a6335b6ca",
+                "reference": "b1ee7084e363f063f102ff1576b7af7a6335b6ca",
                 "shasum": ""
             },
             "require": {
@@ -2290,7 +2290,7 @@
                 "runtime"
             ],
             "support": {
-                "source": "https://github.com/symfony/runtime/tree/v5.4.46"
+                "source": "https://github.com/symfony/runtime/tree/v5.4.52"
             },
             "funding": [
                 {
@@ -2302,11 +2302,15 @@
                     "type": "github"
                 },
                 {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-11-06T08:58:41+00:00"
+            "time": "2026-05-20T07:05:12+00:00"
         },
         {
             "name": "symfony/service-contracts",
