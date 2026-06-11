@@ -4,63 +4,60 @@ namespace App;
 
 class Weekend
 {
-    private const MAPPING_EMOTICONS_EMOJIS = [
-        '\o/'  => '🎉',
+    private const array MAPPING_EMOTICONS_EMOJIS = [
+        '\o/' => '🎉',
         '◄:•D' => '🥳',
-        'B-)'  => '😎',
-        '¬‿¬'  => '😏',
-        ':('   => '😟',
-        'X-('  => '😠',
+        'B-)' => '😎',
+        '¬‿¬' => '😏',
+        ':(' => '😟',
+        'X-(' => '😠',
     ];
 
     /**
-     * Compute the main text with emojis
+     * Compute the main text with emojis.
      */
-    public function getRichText(): string
+    public function getRichText(\DateTimeImmutable $now = new \DateTimeImmutable()): string
     {
-        return strtr($this->getText(), self::MAPPING_EMOTICONS_EMOJIS);
+        return strtr($this->getText($now), self::MAPPING_EMOTICONS_EMOJIS);
     }
 
     /**
-     * Compute the main subtext with emojis
+     * Compute the main subtext with emojis.
      */
-    public function getRichSubText(): string
+    public function getRichSubText(\DateTimeImmutable $now = new \DateTimeImmutable()): string
     {
-        return strtr($this->getSubText(), self::MAPPING_EMOTICONS_EMOJIS);
+        return strtr($this->getSubText($now), self::MAPPING_EMOTICONS_EMOJIS);
     }
 
     /**
-     * Compute the main text
+     * Compute the main text.
      */
-    public function getText(): string
+    public function getText(\DateTimeImmutable $now = new \DateTimeImmutable()): string
     {
-        $msg = "Non. ¯\_(ツ)_/¯"; // Default
+        $msg = 'Non. ¯\_(ツ)_/¯'; // Default
 
-        if ('April 1st' == date('F jS')) {
+        if ('April 1st' === $now->format('F jS')) {
             // April fool
-            return "C'est le week-end ! \o/";
+            return "C'est le week-end ! \\o/";
         }
 
-        if ('Friday' == date('l')) {
-            if (date('G') >= 18) {
-                $msg = "C'est le week-end ! \o/";
-            } elseif (date('G') >= 16){
+        if ('Friday' === $now->format('l')) {
+            if ((int) $now->format('G') >= 18) {
+                $msg = "C'est le week-end ! \\o/";
+            } elseif ((int) $now->format('G') >= 16) {
                 $msg = "Officiellement non, mais c'est comme si. ¬‿¬";
             } else {
-                $msg = "Presque, mais pas encore. :(";
+                $msg = 'Presque, mais pas encore. :(';
             }
-        }
-        elseif ('Thursday' == date('l') && (date('G') >= 14)) {
-            $msg = "Bientôt… B-)";
-        }
-        elseif ('Saturday' == date('l')) {
-            $msg = "C'est le week-end ! \o/";
-        }
-        elseif ('Sunday' == date('l')) {
-            if ((date('G') >= 21)) {
+        } elseif ('Thursday' === $now->format('l') && ((int) $now->format('G') >= 14)) {
+            $msg = 'Bientôt… B-)';
+        } elseif ('Saturday' === $now->format('l')) {
+            $msg = "C'est le week-end ! \\o/";
+        } elseif ('Sunday' === $now->format('l')) {
+            if ((int) $now->format('G') >= 21) {
                 $msg = "C'est la fin… :(";
             } else {
-                $msg = "C'est le week-end ! \o/";
+                $msg = "C'est le week-end ! \\o/";
             }
         }
 
@@ -68,52 +65,51 @@ class Weekend
     }
 
     /**
-     * Compute the subtext
+     * Compute the subtext.
      */
-    public function getSubText(): string
+    public function getSubText(\DateTimeImmutable $now = new \DateTimeImmutable()): string
     {
         $msg = '';
 
         // Jour férié demain
-        if (false !== $this->checkTomorrowNotWorkingDay()) {
+        if (false !== $this->checkTomorrowNotWorkingDay($now)) {
             // Aujourd'hui c'est vendredi, donc demain Samedi
-            if ('Friday' == date('l')) {
-                $msg = "Et on perd un jour férié ce week-end. X-(";
+            if ('Friday' === $now->format('l')) {
+                $msg = 'Et on perd un jour férié ce week-end. X-(';
             }
             // Aujourd'hui c'est samedi, donc demain Dimanche
-            elseif ('Saturday' == date('l')) {
-                $msg = "Et on perd un jour férié ce week-end. X-(";
+            elseif ('Saturday' === $now->format('l')) {
+                $msg = 'Et on perd un jour férié ce week-end. X-(';
             } else {
-                $msg = "Mais demain, on ne travaille pas ! B-)";
+                $msg = 'Mais demain, on ne travaille pas ! B-)';
             }
         }
 
         // Jour férié aujourd'hui
-        if (false !== $this->checkNotWorkingDay()) {
-            if ('Friday' == date('l')) {
-                $msg = "En fait, si. C'est d’ores et déjà le week-end ! \o/";
-            }
-            elseif ('Monday' == date('l')) {
-                $msg = "En fait, si. C'est toujours le week-end ! \o/";
+        if (false !== $this->checkNotWorkingDay($now)) {
+            if ('Friday' === $now->format('l')) {
+                $msg = "En fait, si. C'est d'ores et déjà le week-end ! \\o/";
+            } elseif ('Monday' === $now->format('l')) {
+                $msg = "En fait, si. C'est toujours le week-end ! \\o/";
             } else {
-                $msg = "Mais on ne travaille pas ! B-)";
+                $msg = 'Mais on ne travaille pas ! B-)';
             }
         }
 
         return $msg;
     }
 
-    public function isWeekend()
+    public function isWeekend(\DateTimeImmutable $now = new \DateTimeImmutable()): bool
     {
-        if ('April 1st' == date('F jS')) {
+        if ('April 1st' === $now->format('F jS')) {
             // April fool
             return true;
         }
 
-        if ('Friday' == date('l') && date('G') >= 18) {
+        if ('Friday' === $now->format('l') && (int) $now->format('G') >= 18) {
             return true;
         }
-        elseif ('Saturday' == date('l') || 'Sunday' == date('l')) {
+        if ('Saturday' === $now->format('l') || 'Sunday' === $now->format('l')) {
             return true;
         }
 
@@ -121,67 +117,68 @@ class Weekend
     }
 
     /**
-     * Compute all holidays of the year
+     * Compute all holidays of the year.
      *
-     * @param int|null $year
-     * @return array
+     * @return array<string, string> An array of holidays in the format 'd-m-Y'
      */
-    private function getHolidays($year = null)
+    private function getHolidays(\DateTimeImmutable $now, ?int $year = null): array
     {
-        if ($year === null) {
-            $year = intval(date('Y'));
+        if (null === $year) {
+            $year = (int) $now->format('Y');
         }
 
         // Everything can be compute from the easter date
-        $easterDate  = easter_date($year);
-        $easterDay   = date('j', $easterDate);
-        $easterMonth = date('n', $easterDate);
-        $easterYear  = date('Y', $easterDate);
+        $easterDate = easter_date($year);
+        $easterDay = (int) date('j', $easterDate);
+        $easterMonth = (int) date('n', $easterDate);
+        $easterYear = (int) date('Y', $easterDate);
 
-        $holidays = array(
+        return [
             // These days have a fixed date
-            'nouvelan'    => date('d-m-Y', mktime(0, 0, 0, 1,  1,  $year)), // 1er janvier
-            'fetetravail' => date('d-m-Y', mktime(0, 0, 0, 5,  1,  $year)), // Fête du travail
-            'victoire'    => date('d-m-Y', mktime(0, 0, 0, 5,  8,  $year)), // Victoire des alliés
-            'fetenat'     => date('d-m-Y', mktime(0, 0, 0, 7,  14, $year)), // Fête nationale
-            'assomption'  => date('d-m-Y', mktime(0, 0, 0, 8,  15, $year)), // Assomption
-            'toussaint'   => date('d-m-Y', mktime(0, 0, 0, 11, 1,  $year)), // Toussaint
-            'armistice'   => date('d-m-Y', mktime(0, 0, 0, 11, 11, $year)), // Armistice
-            'noel'        => date('d-m-Y', mktime(0, 0, 0, 12, 25, $year)), // Noël
+            'nouvelan' => date('d-m-Y', $this->mktime(0, 0, 0, 1, 1, $year)), // 1er janvier
+            'fetetravail' => date('d-m-Y', $this->mktime(0, 0, 0, 5, 1, $year)), // Fête du travail
+            'victoire' => date('d-m-Y', $this->mktime(0, 0, 0, 5, 8, $year)), // Victoire des alliés
+            'fetenat' => date('d-m-Y', $this->mktime(0, 0, 0, 7, 14, $year)), // Fête nationale
+            'assomption' => date('d-m-Y', $this->mktime(0, 0, 0, 8, 15, $year)), // Assomption
+            'toussaint' => date('d-m-Y', $this->mktime(0, 0, 0, 11, 1, $year)), // Toussaint
+            'armistice' => date('d-m-Y', $this->mktime(0, 0, 0, 11, 11, $year)), // Armistice
+            'noel' => date('d-m-Y', $this->mktime(0, 0, 0, 12, 25, $year)), // Noël
 
             // These days have a date depending on easter
-            'lundi'     => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 1,    $easterYear)), // Lundi de Pâques
-            'ascension' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 39, $easterYear)), // Ascension
-            'pentecote' => date('d-m-Y', mktime(0, 0, 0, $easterMonth, $easterDay + 50, $easterYear)), // Lundi de Pentecôte
+            'lundi' => date('d-m-Y', $this->mktime(0, 0, 0, $easterMonth, $easterDay + 1, $easterYear)), // Lundi de Pâques
+            'ascension' => date('d-m-Y', $this->mktime(0, 0, 0, $easterMonth, $easterDay + 39, $easterYear)), // Ascension
+            'pentecote' => date('d-m-Y', $this->mktime(0, 0, 0, $easterMonth, $easterDay + 50, $easterYear)), // Lundi de Pentecôte
 
-            'nextnouvelan' => date('d-m-Y', mktime(0, 0, 0, 1,  1,  $year+1)), // next 1er janvier
-            //'test' => date('d-m-Y', time()), // TEST
-        );
+            'nextnouvelan' => date('d-m-Y', $this->mktime(0, 0, 0, 1, 1, $year + 1)), // next 1er janvier
+        ];
+    }
 
-        //sort($holidays);
+    private function mktime(int $hour, int $minute, int $second, int $month, int $day, int $year): int
+    {
+        $time = mktime($hour, $minute, $second, $month, $day, $year);
 
-        return $holidays;
+        if (false === $time) {
+            throw new \RuntimeException('Unable to compute the timestamp for the given date.');
+        }
+
+        return $time;
     }
 
     /**
      * Are we working today?
-     *
-     * @return mixed
      */
-    private function checkNotWorkingDay()
+    private function checkNotWorkingDay(\DateTimeImmutable $now): string|false
     {
-        return array_search(date('d-m-Y'), $this->getHolidays());
+        return array_search($now->format('d-m-Y'), $this->getHolidays($now), true);
     }
 
     /**
      * Are we working tomorrow?
-     *
-     * @return mixed
      */
-    private function checkTomorrowNotWorkingDay()
+    private function checkTomorrowNotWorkingDay(\DateTimeImmutable $now): string|false
     {
-        $tomorrow = date('d-m-Y', strtotime("+1day"));
+        $tomorrow = $now->modify('+1 day')->format('d-m-Y');
 
-        return array_search($tomorrow, $this->getHolidays());
+        return array_search($tomorrow, $this->getHolidays($now), true);
     }
 }

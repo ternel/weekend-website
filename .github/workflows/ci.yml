@@ -1,0 +1,42 @@
+name: Continuous Integration
+
+"on":
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+
+permissions:
+    contents: read
+
+env:
+    # Fix for symfony/color detection. We know GitHub Actions can handle it
+    ANSICON: 1
+    CASTOR_CONTEXT: ci
+
+jobs:
+    ci:
+        name: Continuous Integration
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+              with:
+                persist-credentials: false
+
+            - name: setup-castor
+              uses: castor-php/setup-castor@827c7ae1be0bb45e42a6082cad943a2afe0ffd40 # v1.0.0
+
+            - name: "Build and start the infrastructure"
+              run: "castor start"
+
+            - name: "Check PHP coding standards"
+              run: "castor qa:cs --dry-run"
+
+            - name: "Run Twig CS"
+              run: "castor qa:twig-cs --dry-run"
+
+            - name: "Run PHPStan"
+              run: castor qa:phpstan
+
+            - name: "Run PHPUnit"
+              run: "castor qa:phpunit"

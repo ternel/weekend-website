@@ -4,11 +4,11 @@
 
 BASE=$(dirname $0)
 
-rm -rf mkdir $BASE/certs/
+CERTS_DIR=$BASE/certs
 
-CERTS_DIR=$BASE/etc/ssl/certs
-
+rm -rf $CERTS_DIR
 mkdir -p $CERTS_DIR
+touch $CERTS_DIR/.gitkeep
 
 openssl req -x509 -sha256 -newkey rsa:4096 \
     -keyout $CERTS_DIR/key.pem \
