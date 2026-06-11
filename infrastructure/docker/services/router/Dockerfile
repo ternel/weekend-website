@@ -1,3 +1,8 @@
-FROM traefik:v2.2
+FROM traefik:v3.7.1
 
-COPY etc/. /etc/
+COPY traefik /etc/traefik
+
+ARG PROJECT_NAME
+RUN sed -i "s/{{ PROJECT_NAME }}/${PROJECT_NAME}/g" /etc/traefik/traefik.yaml
+
+VOLUME [ "/etc/ssl/certs" ]

@@ -1,1 +1,7 @@
-*.pyc
+/.castor.stub.php
+/infrastructure/docker/docker-compose.override.yml
+/infrastructure/docker/services/router/certs/*.pem
+
+# Tools
+.php-cs-fixer.cache
+.twig-cs-fixer.cache
