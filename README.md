@@ -1,4 +1,8 @@
-# My project
+# estcequecestbientotleweekend.fr
+
+Ok, the code sucks. But I was drunk when I did it.
+
+---
 
 ## Running the application locally
 
