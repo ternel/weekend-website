@@ -11,9 +11,12 @@ use function Castor\run;
 use function docker\about;
 use function docker\build;
 use function docker\docker_compose_run;
+use function docker\get_services;
 use function docker\up;
 
-guard_min_version('1.5.0');
+defined('CASTOR_USE_CHDIR') || define('CASTOR_USE_CHDIR', true);
+
+guard_min_version('1.8.0');
 
 import(__DIR__ . '/.castor');
 
@@ -51,8 +54,14 @@ function install(): void
 {
     io()->title('Installing the application');
 
+    if (!isset(get_services()['builder'])) {
+        io()->comment('No builder service in this stack: the application is embedded in the images, nothing to install.');
+
+        return;
+    }
+
     io()->section('Installing PHP dependencies');
-    docker_compose_run('composer install -n --prefer-dist --optimize-autoloader');
+    docker_compose_run(['composer', 'install', '-n', '--prefer-dist', '--optimize-autoloader']);
 
     qa\install();
 }
@@ -62,7 +71,7 @@ function update(bool $withTools = false): void
 {
     io()->title('Updating dependencies...');
 
-    docker_compose_run('composer update -o');
+    docker_compose_run(['composer', 'update', '-o']);
 
     if ($withTools) {
         qa\update();
@@ -74,7 +83,7 @@ function cache_clear(bool $warm = true): void
 {
     io()->title('Clearing the application cache');
 
-    docker_compose_run('rm -rf var/cache/');
+    docker_compose_run(['rm', '-rf', 'var/cache/']);
 
     if ($warm) {
         cache_warmup();
@@ -86,7 +95,7 @@ function cache_warmup(): void
 {
     io()->title('Warming the application cache');
 
-    docker_compose_run('bin/console cache:warmup', c: context()->withAllowFailure());
+    docker_compose_run(['bin/console', 'cache:warmup'], c: context()->withAllowFailure());
 }
 
 #[AsTask(description: 'Deploy the application to production')]

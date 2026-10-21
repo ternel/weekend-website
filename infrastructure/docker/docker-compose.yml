@@ -34,7 +34,7 @@ services:
             - APP_ENV
             # The following list contains the common environment variables exposed by CI platforms
             - GITHUB_ACTIONS
-            - CI # Travis CI, CircleCI, Cirrus CI, Gitlab CI, Appveyor, CodeShip, dsari
+            - CI # Travis CI, CircleCI, Cirrus CI, Appveyor, CodeShip, dsari
             - CONTINUOUS_INTEGRATION # Travis CI, Cirrus CI
             - BUILD_NUMBER # Jenkins, TeamCity
             - RUN_ID # TaskCluster, dsari
