@@ -1,6 +1,6 @@
 # hadolint global ignore=DL3008
 
-FROM debian:13.5-slim AS php-base
+FROM debian:13.7-slim AS php-base
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -23,6 +23,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 ARG PHP_VERSION
+# Minimal patch version of each PHP branch, to bump after a security release: it
+# invalidates the build cache (local and registry) of the PHP packages, which would
+# keep the vulnerable version otherwise, and the build fails until Sury publishes it
+ARG PHP_MIN_VERSIONS="8.3.35 8.4.26 8.5.11"
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -40,10 +44,16 @@ RUN apt-get update \
         "php${PHP_VERSION}-xml" \
         "php${PHP_VERSION}-zip" \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
+    && for min in ${PHP_MIN_VERSIONS}; do \
+        if [ "${min%.*}" = "${PHP_VERSION}" ] && dpkg --compare-versions "$(php -r 'echo PHP_VERSION;')" lt "${min}"; then \
+            echo "PHP ${min} is required, packages.sury.org does not have it yet." >&2; \
+            exit 1; \
+        fi; \
+    done
 
-# Configuration
-COPY base/php-configuration /etc/php/${PHP_VERSION}
+# Every PHP setting of every image: each stage enables its own ones with phpenmod
+COPY php/mods-available/ /etc/php/${PHP_VERSION}/mods-available/
 
 ENV PHP_VERSION=${PHP_VERSION}
 ENV HOME=/home/app
@@ -64,16 +74,21 @@ RUN apt-get update \
 
 RUN useradd -s /bin/false nginx
 
-COPY frontend/php-configuration /etc/php/${PHP_VERSION}
-COPY frontend/etc/nginx/. /etc/nginx/
+# Same php-fpm pool and nginx site as the production images (see "Production stages"), the
+# container runs as the host user so the socket directory must be writable by anyone
+COPY php/fpm/php-fpm.conf /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/conf.d/ /etc/nginx/conf.d/
+RUN mkdir -p /var/run/php && chmod 1777 /var/run/php
 RUN rm -rf /etc/service/
-COPY frontend/etc/service/. /etc/service/
-RUN chmod 777 /etc/service/*/supervise/
+COPY runit/ /etc/service/
+RUN mkdir -p /etc/service/nginx/supervise /etc/service/php-fpm/supervise \
+    && chmod 777 /etc/service/*/supervise/
 
 RUN phpenmod app-default \
-    && phpenmod app-fpm
+    && phpenmod -s fpm app-fpm
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["runsvdir", "-P", "/etc/service"]
 
@@ -95,7 +110,6 @@ RUN apt-get update \
         "make" \
         "nodejs" \
         "php${PHP_VERSION}-dev" \
-        "sudo" \
         "unzip" \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
@@ -103,16 +117,17 @@ RUN apt-get update \
     && yarn set version stable
 
 # Install a fake sudo command
-# This is commented out by default because it exposes a security risk if you use this image in production, but it may be useful for development
+# The real `sudo` refuses to work because the container runs as the host's
+# raw UID, which has no /etc/passwd entry. This is a security risk if you use
+# this image in production, but it's fine for the dev-only builder image.
 # Use it at your own risk
 # COPY base/sudo.sh /usr/local/bin/sudo
-# RUN curl -L https://github.com/tianon/gosu/releases/download/1.16/gosu-amd64 -o /usr/local/bin/gosu && \
-#    chmod u+s /usr/local/bin/gosu && \
-#    chmod +x /usr/local/bin/gosu && \
-#    chmod +x /usr/local/bin/sudo
+# RUN curl -L https://github.com/tianon/gosu/releases/download/1.16/gosu-amd64 -o /usr/local/bin/gosu \
+#     && chmod u+s /usr/local/bin/gosu \
+#     && chmod +x /usr/local/bin/gosu \
+#     && chmod +x /usr/local/bin/sudo
 
 # Config
-COPY builder/php-configuration /etc/php/${PHP_VERSION}
 RUN phpenmod app-default \
     && phpenmod app-builder
 
@@ -141,11 +156,112 @@ RUN sed /tmp/completion.bash \
 # Third party tools
 ENV PATH="$PATH:/var/www/tools/bin"
 
-# Good default customization
-RUN cat >> /etc/bash.bashrc <<EOF
+# We can't rely on \u: the container runs as the host's raw UID, which has no
+# /etc/passwd entry, so bash would print "I have no name!" instead. Show
+# "builder" normally, and "root" once elevated (e.g. via the fake sudo).
+RUN cat >> /etc/bash.bashrc <<'EOF'
 . /etc/bash_completion
 
-PS1='\[\e[01;33m\]\u \[\e[00;32m\]\w\[\e[0m\] '
+PS1='\[\e[01;33m\]$([ "$EUID" = 0 ] && echo root || echo builder) \[\e[00;32m\]\w\[\e[0m\] '
 EOF
 
 WORKDIR /var/www/application
+
+# ------------------------- Production stages -------------------------
+#
+# Two self-contained images, "php" and "nginx": the application code is baked
+# in (no bind mounts), dependencies are installed without dev packages and
+# containers run as a non-root user. They talk to each other through the
+# php-fpm unix socket /var/run/php/php-fpm.sock, shared via a volume (docker
+# compose) or an emptyDir (Kubernetes). Cron jobs and workers, if any, are run
+# by the orchestrator with the "php" image (`bin/console ...`).
+#
+# The php-fpm and nginx configuration is the one of the dev "frontend" stage
+# (php/ and nginx/), the production differences live in php/mods-available/app-prod.ini.
+#
+# The application source code is expected in the additional build context
+# named "app", pointing to the application directory (its .dockerignore applies):
+#   docker buildx build --build-context app=../../../../application --target php .
+#
+# Every build step only runs if the application needs it (composer.json,
+# package.json, importmap.php...), so adapt them to your project.
+
+FROM builder AS app-build
+
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+# Dependencies first, for better layer caching. "app" is a build context, not a stage.
+# The brackets make every file optional
+# hadolint ignore=DL3022
+COPY --from=app composer.jso[n] composer.loc[k] symfony.loc[k] ./
+RUN if [ -f composer.json ]; then \
+        composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts --no-autoloader; \
+    fi
+
+# hadolint ignore=DL3022
+COPY --from=app . .
+RUN if [ -f composer.json ]; then \
+        composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader \
+        && composer dump-env prod; \
+    fi \
+    && if [ -f yarn.lock ]; then \
+        yarn install --immutable && yarn build; \
+    elif [ -f package-lock.json ]; then \
+        npm ci && npm run build; \
+    fi \
+    && rm -rf node_modules \
+    && if [ -f importmap.php ]; then \
+        bin/console importmap:install \
+        && bin/console asset-map:compile; \
+    fi \
+    && if [ -f bin/console ]; then \
+        bin/console cache:warmup; \
+    fi
+
+FROM php-base AS php
+
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        "php${PHP_VERSION}-fpm" \
+        libfcgi-bin \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
+    && rm -r "/etc/php/${PHP_VERSION}/fpm/pool.d/"
+
+# Same php-fpm pool as the dev "frontend" stage, plus the production-only settings
+COPY php/fpm/php-fpm.conf /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
+RUN phpenmod app-default \
+    && phpenmod -s fpm app-fpm \
+    && phpenmod app-prod
+
+RUN groupadd -g 1000 app \
+    && useradd -M -u 1000 -g 1000 -s /bin/false app \
+    && mkdir -p /var/run/php \
+    && chown app:app /var/run/php
+
+WORKDIR /var/www/application
+
+COPY --from=app-build --chown=app:app /var/www/application /var/www/application
+
+USER 1000:1000
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+    CMD ["sh", "-c", "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping cgi-fcgi -bind -connect /var/run/php/php-fpm.sock || exit 1"]
+
+CMD ["sh", "-c", "exec /usr/sbin/php-fpm${PHP_VERSION}"]
+
+FROM nginx:1.29-alpine AS nginx
+
+COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=app-build /var/www/application/public /var/www/application/public
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+    CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/ping"]
